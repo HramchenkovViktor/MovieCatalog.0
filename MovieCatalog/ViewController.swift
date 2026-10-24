@@ -50,7 +50,7 @@ final class ViewController: UIViewController {
         tableView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
-
+        tableView.delegate = self
         tableView.dataSource = self
         tableView.register(
             UITableViewCell.self,
@@ -80,3 +80,26 @@ extension ViewController: UITableViewDataSource {
     }
 }
 
+
+extension ViewController: UITableViewDelegate {
+
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
+        let selectedMovie = movies[indexPath.row]
+
+        let detailsVC = MovieDetailsViewController()
+        detailsVC.movie = selectedMovie
+
+        navigationController?.pushViewController(
+            detailsVC,
+            animated: true
+        )
+
+        tableView.deselectRow(
+            at: indexPath,
+            animated: true
+        )
+    }
+}
