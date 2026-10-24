@@ -6,14 +6,19 @@
 //
 
 import UIKit
+import SnapKit
 
 final class ViewController: UIViewController {
 
+    private var movies: [Movie] = []
     private let tableView = UITableView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        view.backgroundColor = .systemBackground
+        
+        setupTableView()
         loadMovies()
     }
 
@@ -30,7 +35,8 @@ final class ViewController: UIViewController {
             let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
             let response = try decoder.decode(MovieResponse.self, from: data)
-
+            movies = response.movies
+            tableView.reloadData()
             for movie in response.movies {
                 print("Фильм: \(movie.title), год: \(movie.year)")
             }
@@ -38,4 +44,39 @@ final class ViewController: UIViewController {
             print("Ошибка загрузки фильмов: \(error)")
         }
     }
+    private func setupTableView() {
+        view.addSubview(tableView)
+
+        tableView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
+        }
+
+        tableView.dataSource = self
+        tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: "MovieCell"
+        )
+    }
 }
+
+extension ViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        movies.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: "MovieCell",
+            for: indexPath
+        )
+        let movie = movies[indexPath.row]
+
+           var content = cell.defaultContentConfiguration()
+           content.text = movie.title
+           content.secondaryText = "Год: \(movie.year)"
+           cell.contentConfiguration = content
+
+           return cell
+    }
+}
+
